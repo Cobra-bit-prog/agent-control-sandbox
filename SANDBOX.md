@@ -21,9 +21,11 @@ No `.env` is required for a local tour: the workspace falls back to an embedded 
 Useful checks:
 
 ```bash
-npm test
+npm test            # policy + hold path (this sandbox)
 npm run typecheck
 ```
+
+`npm test` is the hold/Inbox gate. Platform chrome tests live in `scripts/*.test.mjs` (`npm run test:scripts`) and need the full App Builder `.grok/` tree — they are not required to verify Inbox.
 
 ## How hold works
 
