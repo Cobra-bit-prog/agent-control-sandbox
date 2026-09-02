@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +34,9 @@ function AlertsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Alerts</h1>
-        <p className="text-sm text-muted">Policy breaches, velocity spikes, and large transfers.</p>
+        <p className="text-sm text-muted">
+          Policy breaches, velocity spikes, and holds waiting in Inbox.
+        </p>
       </div>
       {q.data.alerts.length === 0 && (
         <Card>
@@ -57,6 +59,14 @@ function AlertsPage() {
                 <p className="mt-2 text-sm">{a.message}</p>
                 <p className="text-xs text-subtle">
                   {a.agent_name} · {timeAgo(a.created_at)}
+                  {a.type === "approval_hold" ? (
+                    <>
+                      {" · "}
+                      <Link to="/inbox" className="text-primary hover:underline">
+                        Open Inbox
+                      </Link>
+                    </>
+                  ) : null}
                 </p>
               </div>
               {!a.acknowledged && (

@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { evaluateTransfer, type PolicyInput } from "./policy.ts";
+import { evaluateTransfer, protectionScore, type PolicyInput } from "./policy.ts";
 
 const policy: PolicyInput = {
   daily_limit_usd: 2000,
@@ -63,5 +63,37 @@ describe("evaluateTransfer hold vs block", () => {
   it("blocks a denylisted destination (no hold)", () => {
     const v = run({ to: "0xbad" });
     assert.equal(v.action, "block");
+  });
+
+  it("keeps hold when amount also crosses the alert threshold", () => {
+    const v = run({ valueUsd: 600 });
+    assert.equal(v.action, "hold");
+    assert.ok(v.reasons.some((r) => /alert threshold/i.test(r)));
+  });
+
+  it("does not hold at the policy layer when the allowlist is empty", () => {
+    const v = run({
+      to: "0xunknown",
+      policy: { ...policy, allowlist: [] },
+    });
+    assert.equal(v.action, "allow");
+  });
+});
+
+describe("protectionScore trial copy", () => {
+  it("describes a 24-hour trial, not a 3-day trial", () => {
+    const s = protectionScore({
+      agentCount: 1,
+      allowlisted: 1,
+      tightTxCap: 1,
+      openCritical: 0,
+      paid: false,
+      expired: false,
+    });
+    assert.ok(s.notes.some((n) => /24-hour trial/i.test(n)));
+    assert.equal(
+      s.notes.some((n) => /3-day/i.test(n)),
+      false,
+    );
   });
 });

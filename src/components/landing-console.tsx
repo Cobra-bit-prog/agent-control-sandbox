@@ -34,7 +34,7 @@ const AGENTS = [
 
 const FEED = [
   { t: "12s", agent: "Trade Agent Alpha", ev: "Swap", amt: "$640", tone: "ok" as const },
-  { t: "1m", agent: "Treasury Bot", ev: "Policy block", amt: "$2,400", tone: "bad" as const },
+  { t: "1m", agent: "Treasury Bot", ev: "Waiting for you", amt: "$2,400", tone: "hold" as const },
   { t: "4m", agent: "Solana Router", ev: "Transfer", amt: "$180", tone: "ok" as const },
   { t: "9m", agent: "Treasury Bot", ev: "Pre-sign allow", amt: "$420", tone: "ok" as const },
   { t: "18m", agent: "Trade Agent Alpha", ev: "Oracle update", amt: "$0", tone: "ok" as const },
@@ -47,7 +47,7 @@ export function LandingConsole() {
         <span className="size-2.5 rounded-full bg-danger/80" />
         <span className="size-2.5 rounded-full bg-warning/80" />
         <span className="size-2.5 rounded-full bg-success/80" />
-        <p className="ml-3 font-mono text-[11px] text-subtle">app.agentguard · live console</p>
+        <p className="ml-3 font-mono text-[11px] text-subtle">agent-control · sandbox</p>
         <span className="ml-auto hidden items-center gap-2 text-[11px] text-success sm:flex">
           <span className="size-1.5 animate-pulse rounded-full bg-success" />
           Syncing
@@ -60,7 +60,7 @@ export function LandingConsole() {
         <aside className="hidden border-r border-border p-4 lg:block">
           <p className="text-xs font-medium text-subtle">Workspace</p>
           <ul className="mt-3 space-y-1 text-sm">
-            {["Overview", "Agents", "Policies", "Alerts"].map((l, i) => (
+            {["Overview", "Inbox", "Agents", "Policies", "Alerts"].map((l, i) => (
               <li
                 key={l}
                 className={
@@ -137,7 +137,9 @@ export function LandingConsole() {
                     className={
                       f.tone === "bad"
                         ? "size-2 shrink-0 rounded-full bg-danger"
-                        : "size-2 shrink-0 rounded-full bg-success"
+                        : f.tone === "hold"
+                          ? "size-2 shrink-0 rounded-full bg-warning"
+                          : "size-2 shrink-0 rounded-full bg-success"
                     }
                   />
                   <span className="w-10 shrink-0 font-mono text-[11px] text-subtle">{f.t}</span>
