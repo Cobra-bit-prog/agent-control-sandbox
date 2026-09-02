@@ -41,6 +41,7 @@ function DashboardPage() {
           : `Recorded ${r.created} demo event${r.created === 1 ? "" : "s"}`,
       );
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
+      void qc.invalidateQueries({ queryKey: ["holds-count"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -94,6 +95,25 @@ function DashboardPage() {
           Scan chain
         </Button>
       </div>
+
+      {(d.openHolds ?? 0) > 0 && (
+        <Card className="border-warning/30 bg-warning/10">
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
+            <div>
+              <p className="text-sm font-medium">
+                {d.openHolds} send{d.openHolds === 1 ? "" : "s"} waiting for you
+              </p>
+              <p className="text-xs text-muted">
+                Off-policy pre-sign checks pause in Inbox until you Allow once, Always allow, or
+                Block.
+              </p>
+            </div>
+            <Button asChild>
+              <Link to="/inbox">Open Inbox</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Stat
@@ -212,14 +232,14 @@ function DashboardPage() {
           <CardContent className="space-y-3">
             {d.txs.slice(0, 8).map((t) => {
               const agent = d.agents.find((a) => a.id === t.agent_id);
-              const failed = t.status === "failed" || t.is_violation;
+              const held = t.status === "held";
               return (
                 <div key={t.id} className="flex items-start gap-3">
                   <span
                     className={
-                      failed
+                      t.status === "blocked" || t.status === "failed"
                         ? "mt-1 size-2 shrink-0 rounded-full bg-danger"
-                        : t.kind.toLowerCase().includes("limit")
+                        : held || t.kind.toLowerCase().includes("limit")
                           ? "mt-1 size-2 shrink-0 rounded-full bg-warning"
                           : "mt-1 size-2 shrink-0 rounded-full bg-success"
                     }

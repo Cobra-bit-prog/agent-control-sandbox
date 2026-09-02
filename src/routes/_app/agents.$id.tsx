@@ -223,7 +223,7 @@ function AgentDetailPage() {
                     className={
                       sim.data.action === "block"
                         ? "bg-danger/15 text-danger"
-                        : sim.data.action === "alert"
+                        : sim.data.action === "hold" || sim.data.action === "alert"
                           ? "bg-warning/15 text-warning"
                           : "bg-success/15 text-success"
                     }
@@ -316,8 +316,8 @@ function PreSignCard({
       <CardContent className="space-y-3">
         <p className="text-sm text-muted">
           {demo
-            ? "This is a demo wallet. The same hook works — wire it on a live agent before production sends."
-            : "Your agent MUST call this before it signs. If must_abort is true, do not broadcast. If decision is hold, poll /api/v1/approvals/:id until you allow or block."}
+            ? "Demo wallet. The same hook works on a live agent. Off-policy checks hold in Inbox until you decide."
+            : "Your agent MUST call this before it signs. If must_abort is true, do not broadcast. If decision is hold, poll /api/v1/approvals/:id until you allow or block in Inbox."}
         </p>
         <div className="space-y-1.5">
           <Label>API key</Label>

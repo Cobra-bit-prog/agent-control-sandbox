@@ -422,10 +422,7 @@ async function seedSampleHold(userId: string) {
     txId,
     to: dest,
     valueUsd: 2400,
-    reasons: [
-      "First-time destination — waiting for you.",
-      "Amount exceeds max transaction of $500.",
-    ],
+    reasons: ["First-time destination — waiting for you."],
   });
 }
 
@@ -440,7 +437,7 @@ async function loadEntitlement(userId: string): Promise<Entitlement> {
   if (ent.expired && rows[0]?.status !== "expired") {
     await sql`update subscriptions set status = ${"expired"}, updated_at = ${new Date().toISOString()} where user_id = ${userId}`;
     await sql`update agents set is_paused = true where user_id = ${userId}`;
-    await logAudit(userId, "trial_expired", "3-day free trial ended. Agents paused.");
+    await logAudit(userId, "trial_expired", "24-hour free trial ended. Agents paused.");
   }
   return ent;
 }
@@ -448,7 +445,7 @@ async function loadEntitlement(userId: string): Promise<Entitlement> {
 async function requireWritable(userId: string) {
   const ent = await loadEntitlement(userId);
   if (!ent.writable) {
-    throw new Error("Your 3-day free trial has ended. Upgrade to resume monitoring.");
+    throw new Error("Your 24-hour free trial has ended. Upgrade to resume monitoring.");
   }
   return ent;
 }
@@ -619,6 +616,7 @@ export const getDashboard = createServerFn({ method: "GET" })
     })) as AuditRow[];
 
     const entitlement = await loadEntitlement(context.userId);
+    const openHolds = await countOpenHolds(context.userId);
     const volume24h = agents.reduce((s, a) => s + (volume[a.id] ?? 0), 0);
     const onchainUsd = agents.filter((a) => !a.is_demo).reduce((s, a) => s + a.balance_usd, 0);
     const liveCount = agents.filter((a) => !a.is_demo).length;
@@ -662,6 +660,7 @@ export const getDashboard = createServerFn({ method: "GET" })
       liveCount,
       demoCount,
       openAlerts,
+      openHolds,
       risk,
       agentLimit: entitlement.agentLimit,
       expired: entitlement.expired,

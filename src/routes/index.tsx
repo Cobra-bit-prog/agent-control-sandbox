@@ -13,7 +13,7 @@ import { LandingConsole } from "@/components/landing-console";
 import { Button } from "@/components/ui/button";
 import { SignedIn, SignedOut } from "@/lib/auth/gates";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
-import { PLANS } from "@/lib/plans";
+import { PLANS, FREE_TRIAL_HOURS } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({ component: Home });
@@ -45,7 +45,7 @@ function Home() {
                   <Link to="/login">Sign in</Link>
                 </Button>
                 <Button asChild>
-                  <Link to="/login">Start 3-day trial</Link>
+                  <Link to="/login">Start 24-hour trial</Link>
                 </Button>
               </SignedOut>
               <SignedIn>
@@ -72,7 +72,7 @@ function Home() {
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Button size="lg" asChild>
-            <Link to="/login">Start 3-day trial</Link>
+            <Link to="/login">Start 24-hour trial</Link>
           </Button>
           <Button size="lg" variant="secondary" asChild>
             <a href="#product">How the hook works</a>
@@ -97,7 +97,7 @@ function Home() {
             {
               icon: KeyRound,
               title: "Pre-sign hook",
-              body: "REST + MCP. Your agent calls /api/v1/check before it signs. If must_abort is true, it must not send.",
+              body: "REST + MCP. Your agent calls /api/v1/check before it signs. Off-policy sends hold — must_abort is true until you Allow once, Always allow, or Block in Inbox.",
             },
             {
               icon: Bell,
@@ -127,7 +127,7 @@ function Home() {
               { n: "01", t: "Enroll a wallet", d: "Paste a live address. We pull native balance and recent on-chain transfers." },
               { n: "02", t: "Set policy", d: "Cap daily spend, restrict destinations, set hourly velocity." },
               { n: "03", t: "Wire the hook", d: "Give the agent its API key. It MUST POST /api/v1/check before every send." },
-              { n: "04", t: "Watch + pause", d: "On-chain sync and pre-sign decisions land in one feed. Pause from the console." },
+              { n: "04", t: "Decide in Inbox", d: "Off-policy sends wait in Inbox. Allow once, Always allow this address, or Block — or the request expires in 10 minutes." },
             ].map((s) => (
               <li key={s.n} className="rounded-[var(--radius-lg)] bg-surface p-5 ring-1 ring-border">
                 <p className="font-mono text-xs text-primary">{s.n}</p>
@@ -145,7 +145,7 @@ function Home() {
             Pricing
           </h2>
           <p className="mt-2 text-muted">
-            3-day free trial. After that, monitoring requires a paid plan.
+            {FREE_TRIAL_HOURS}-hour free trial. After that, monitoring requires a paid plan.
           </p>
           <div className="mt-8 grid gap-4 md:grid-cols-4">
             {Object.values(PLANS).map((p) => (
@@ -166,7 +166,7 @@ function Home() {
                   )}
                 </p>
                 {p.id === "free" && (
-                  <p className="mt-1 text-xs font-medium text-primary">3 days maximum</p>
+                  <p className="mt-1 text-xs font-medium text-primary">{FREE_TRIAL_HOURS} hours maximum</p>
                 )}
                 <p className="mt-2 text-sm text-muted">{p.blurb}</p>
                 <ul className="mt-4 flex-1 space-y-2 text-sm text-muted">
@@ -184,7 +184,7 @@ function Home() {
                   </li>
                 </ul>
                 <Button className="mt-6" variant={p.id === "pro" ? "default" : "secondary"} asChild>
-                  <Link to="/login">{p.price === 0 ? "Start 3-day trial" : "Choose plan"}</Link>
+                  <Link to="/login">{p.price === 0 ? "Start 24-hour trial" : "Choose plan"}</Link>
                 </Button>
               </div>
             ))}

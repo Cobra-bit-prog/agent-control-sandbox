@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { changePlan, getProfile } from "@/lib/server/guard";
-import { FREE_TRIAL_DAYS, PLANS, formatTrialLeft, type PlanId } from "@/lib/plans";
+import { FREE_TRIAL_HOURS, PLANS, formatTrialLeft, type PlanId } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/billing")({
@@ -36,7 +36,7 @@ function BillingPage() {
         <h1 className="text-2xl font-semibold tracking-tight">Billing</h1>
         <p className="text-sm text-muted">
           {current === "free" && !expired && trialing
-            ? `Free 3-day trial — ${formatTrialLeft(q.data?.msLeft ?? 0)}.`
+            ? `Free 24-hour trial — ${formatTrialLeft(q.data?.msLeft ?? 0)}.`
             : expired
               ? "Trial ended. Choose a plan to resume monitoring."
               : `Current plan: ${PLANS[current]?.name ?? current}`}
@@ -59,7 +59,7 @@ function BillingPage() {
                 </p>
                 {isFree && (
                   <p className="mt-1 text-xs font-medium text-primary">
-                    {FREE_TRIAL_DAYS}-day maximum
+                    {FREE_TRIAL_HOURS}-hour maximum
                   </p>
                 )}
                 <p className="mt-2 flex-1 text-sm text-muted">{p.blurb}</p>
@@ -93,7 +93,7 @@ function BillingPage() {
         })}
       </div>
       <p className="text-xs text-subtle">
-        Free is a one-time {FREE_TRIAL_DAYS}-day trial. After it ends, scans and new
+        Free is a one-time {FREE_TRIAL_HOURS}-hour trial. After it ends, scans and new
         agents pause until you upgrade. Paid plans are monthly.
       </p>
       <p className="text-xs text-warning">

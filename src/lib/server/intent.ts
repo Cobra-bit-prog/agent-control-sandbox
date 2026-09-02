@@ -1,4 +1,5 @@
 import { getSql } from "@/lib/db";
+import { pollDecisionFromStatus, shouldHoldFirstTimeDestination } from "@/lib/hold";
 import { evaluateEntitlement } from "@/lib/plans";
 import { evaluateTransfer } from "@/lib/policy";
 import { ensureSchema } from "@/lib/server/guard";
@@ -88,12 +89,18 @@ export async function checkTransferIntent(input: {
   if (action === "allow" || action === "alert") {
     const known = await sql<{ to_address: string }>`
       select distinct to_address from transactions
-      where agent_id = ${String(agent.id)} and status = ${"success"}
+      where agent_id = ${String(agent.id)}
+        and status = ${"success"}
+        and source <> ${"presign"}
     `;
-    const allow = asStrings(p.allowlist).map((a) => a.toLowerCase());
-    const seen = new Set(known.map((r) => r.to_address.toLowerCase()));
-    const dest = input.to.trim().toLowerCase();
-    if (dest && !allow.includes(dest) && !seen.has(dest)) {
+    if (
+      shouldHoldFirstTimeDestination({
+        action,
+        dest: input.to,
+        allowlist: asStrings(p.allowlist),
+        seenSuccessDestinations: known.map((r) => r.to_address),
+      })
+    ) {
       action = "hold";
       reasons.unshift("First-time destination — waiting for you.");
     }
@@ -191,12 +198,7 @@ export async function pollApprovalIntent(input: { apiKey: string; approvalId: st
   });
   if (!row) return { ok: false as const, status: 404, error: "Unknown approval." };
 
-  const decision =
-    row.status === "allow" || row.status === "always"
-      ? "allow"
-      : row.status === "hold"
-        ? "hold"
-        : "block";
+  const decision = pollDecisionFromStatus(row.status);
   const mustAbort = decision !== "allow";
   const expiresInS = Math.max(0, Math.round((new Date(row.expires_at).getTime() - Date.now()) / 1000));
 

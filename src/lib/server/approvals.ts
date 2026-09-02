@@ -1,7 +1,8 @@
 import { getSql } from "@/lib/db";
+import { HOLD_TTL_MS } from "@/lib/hold";
 import { uid } from "@/lib/utils";
 
-export const HOLD_TTL_MS = 10 * 60 * 1000;
+export { HOLD_TTL_MS };
 
 export type ApprovalStatus = "hold" | "allow" | "always" | "block" | "expired";
 
